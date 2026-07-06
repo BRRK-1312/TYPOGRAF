@@ -1340,6 +1340,24 @@ if(typeof define === 'function' && define.amd){
   .editbar .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
   .editbar button{padding:8px 14px;font-size:11px;box-shadow:2px 2px 0 rgba(16,16,16,.35)}
 
+  /* ---------- ajustes por glifo ---------- */
+  .adjust{border:2px solid var(--ink);padding:16px 18px;margin-top:14px;background:#fff}
+  .adjust h3{font-family:var(--disp);font-weight:900;text-transform:uppercase;
+             font-size:15px;letter-spacing:.02em;margin-bottom:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+  .chip{min-width:44px;height:50px;font-size:27px;line-height:1;display:flex;
+        align-items:center;justify-content:center;background:#fff;color:var(--ink);
+        border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(16,16,16,.3);
+        padding:2px 8px;cursor:pointer;text-transform:none;letter-spacing:0}
+  .chip.mod{border-color:var(--red);box-shadow:2px 2px 0 rgba(208,47,24,.5)}
+  .chip.selected{background:var(--ink);color:var(--paper)}
+  .chip.selected.mod{background:var(--red);border-color:var(--red);color:#fff}
+  .adjctl{border-top:2px dashed var(--ink);padding-top:14px;display:grid;
+          grid-template-columns:1fr 1fr;gap:14px 24px}
+  .adjctl .btns{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+  .adjctl button{padding:9px 16px;font-size:11.5px}
+  @media (max-width:560px){.adjctl{grid-template-columns:1fr}}
+
   /* ---------- filas ---------- */
   .rows{display:flex;flex-direction:column;gap:12px;margin-top:6px}
   .rowcard{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
@@ -1475,6 +1493,23 @@ if(typeof define === 'function' && define.amd){
     <div class="previewBox">
       <canvas class="prev" id="prev"></canvas>
     </div>
+    <div class="adjust" id="adjustPanel" style="display:none">
+      <h3 data-i18n="adjTitle"></h3>
+      <p class="help" data-i18n="adjHelp"></p>
+      <div class="chips" id="adjChips"></div>
+      <p class="help" id="adjPickHint" data-i18n="adjPick"></p>
+      <div class="adjctl" id="adjCtl" style="display:none">
+        <div class="ctl"><label><span data-i18n="lblScale"></span> <output id="oScale">100</output>%</label>
+          <input type="range" id="adjScale" min="50" max="150" value="100"></div>
+        <div class="ctl"><label><span data-i18n="lblDy"></span> <output id="oDy">0</output></label>
+          <input type="range" id="adjDy" min="-200" max="200" step="5" value="0"></div>
+        <div class="btns">
+          <button id="btnApplyAdj" data-i18n="btnApplyAdj"></button>
+          <button class="ghost" id="btnResetGlyph" data-i18n="btnResetGlyph"></button>
+          <button class="ghost" id="btnResetAll" data-i18n="btnResetAll"></button>
+        </div>
+      </div>
+    </div>
     <div class="field">
       <label for="sample" data-i18n="lblSample">Proba-testua</label>
       <input type="text" id="sample" value="">
@@ -1536,7 +1571,12 @@ eu:{
   btnSplit:'Zatitu klik-puntuan',
   btnMergeNext:'Batu eskuinekoarekin',
   btnDelBox:'Ezabatu kutxa',
-  stSplitFail:'Ezin da hor zatitu — alde batean ez dago tintarik.'
+  stSplitFail:'Ezin da hor zatitu — alde batean ez dago tintarik.',
+  adjTitle:'Glifoz glifoko doikuntzak',
+  adjHelp:'Letraren bat besteak baino handiago edo txikiago geratzen bada, hautatu behean eta zuzendu bere tamaina (eta posizio bertikala, flotatzen badu edo hondoratzen bada). Doikuntzak birsortzean aplikatzen dira eta birsortzeen artean gordetzen dira. Gorriz markatutakoek doikuntza dute.',
+  adjPick:'Aukeratu glifo bat doitzeko.',
+  lblScale:'Tamaina',lblDy:'Desplazamendu bertikala (unitateak)',
+  btnApplyAdj:'Aplikatu eta birsortu',btnResetGlyph:'Berrezarri glifoa',btnResetAll:'Berrezarri dena'
 },
 es:{
   title:'HOJA→FUENTE · de hoja de glifos a fuente',
@@ -1579,7 +1619,12 @@ es:{
   btnSplit:'Dividir en el punto del clic',
   btnMergeNext:'Unir con el de la derecha',
   btnDelBox:'Eliminar caja',
-  stSplitFail:'No se puede dividir ahí — uno de los lados no tiene tinta.'
+  stSplitFail:'No se puede dividir ahí — uno de los lados no tiene tinta.',
+  adjTitle:'Ajustes por glifo',
+  adjHelp:'Si alguna letra queda más grande o más pequeña que el resto, selecciónala abajo y corrige su tamaño (y su posición vertical si flota o se hunde). Los ajustes se aplican al regenerar y se conservan entre regeneraciones. Las marcadas en rojo tienen ajuste.',
+  adjPick:'Elige un glifo para ajustarlo.',
+  lblScale:'Tamaño',lblDy:'Desplazamiento vertical (unidades)',
+  btnApplyAdj:'Aplicar y regenerar',btnResetGlyph:'Restablecer glifo',btnResetAll:'Restablecer todo'
 },
 en:{
   title:'SHEET→FONT · glyph sheet to installable font',
@@ -1622,7 +1667,12 @@ en:{
   btnSplit:'Split at click point',
   btnMergeNext:'Merge with the right one',
   btnDelBox:'Delete box',
-  stSplitFail:"Can't split there — one side has no ink."
+  stSplitFail:"Can't split there — one side has no ink.",
+  adjTitle:'Per-glyph adjustments',
+  adjHelp:'If a letter ends up larger or smaller than the rest, select it below and correct its size (and vertical position if it floats or sinks). Adjustments are applied on regeneration and persist across regenerations. Red-marked chips have an adjustment.',
+  adjPick:'Pick a glyph to adjust.',
+  lblScale:'Size',lblDy:'Vertical offset (units)',
+  btnApplyAdj:'Apply and regenerate',btnResetGlyph:'Reset glyph',btnResetAll:'Reset all'
 }};
 let LANG='eu';
 function t(k,p){
@@ -1644,7 +1694,8 @@ document.querySelectorAll('.langbtn').forEach(b=>b.addEventListener('click',()=>
 const S = {
   img:null, W:0, H:0, gray:null, ink:null,
   rows:[], font:null, otfBlob:null, fontCounter:0, builtRows:[],
-  sel:null, lastClick:null
+  sel:null, lastClick:null,
+  adjust:{}, adjSel:null, ffName:null
 };
 const $ = id => document.getElementById(id);
 const logEl = $('log');
@@ -2188,13 +2239,21 @@ async function buildFont(){
       const scale=target/ref;
       log(t('logRow',{n:ri+1,t:type,y:baseline.toFixed(1),r:ref.toFixed(1),s:scale.toFixed(4)}));
 
-      gl.forEach((g,k)=>{
-        const ch=chars[k], cp=ch.codePointAt(0);
+      gl.forEach((g,idx)=>{
+        const ch=chars[idx], cp=ch.codePointAt(0);
         if(seen.has(cp)){ log(t('logDup',{c:ch})); return; }
         const {id,cx0,cy0}=cropToImageData(g);
-        const F=(x,y)=>[ (cx0+x-g.x0)*scale + LSB, (baseline-(cy0+y))*scale ];
+        const adj=S.adjust[ch]||{scale:1,dy:0};
+        const k=adj.scale||1, dy=adj.dy||0;
+        // escala en torno a la línea base (y=0) y al borde izquierdo (LSB),
+        // para que el ajuste no despegue la letra de la línea base
+        const F=(x,y)=>{
+          const fx=(cx0+x-g.x0)*scale + LSB;
+          const fy=(baseline-(cy0+y))*scale;
+          return [ LSB + (fx-LSB)*k, fy*k + dy ];
+        };
         const path=traceToOpentypePath(id,F);
-        const adv=Math.round((g.x1-g.x0)*scale + LSB + RSB);
+        const adv=Math.round((g.x1-g.x0)*scale*k + LSB + RSB);
         glyphs.push(new opentype.Glyph({
           name:'uni'+cp.toString(16).toUpperCase().padStart(4,'0'),
           unicode:cp, advanceWidth:adv, path
@@ -2217,11 +2276,13 @@ async function buildFont(){
     const ff=new FontFace(ffName,`url(${URL.createObjectURL(S.otfBlob)})`);
     await ff.load(); document.fonts.add(ff);
     $('livePrev').style.fontFamily=`"${ffName}", monospace`;
+    S.ffName=ffName;
     if(!$('sample').value) $('sample').value=S.builtRows.join(' ').slice(0,40);
     $('livePrev').textContent=$('sample').value;
     $('specimenTitle').style.fontFamily=`"${ffName}", var(--disp)`;
 
     renderValidation();
+    renderAdjustUI();
     log(t('logBuilt',{n:glyphs.length-2}));
     status(t('stReady',{n:glyphs.length-2}));
     $('result').style.display='block';
@@ -2249,6 +2310,59 @@ function renderValidation(){
     S.font.draw(ctx,x,pad,by,size,{kerning:false});
   });
 }
+
+/* ================= ajustes por glifo ================= */
+function renderAdjustUI(){
+  const panel=$('adjustPanel'); panel.style.display='block';
+  const chips=$('adjChips'); chips.innerHTML='';
+  const chars=[...new Set([...S.builtRows.join('')])];
+  chars.forEach(ch=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='chip'; b.textContent=ch;
+    b.style.fontFamily=`"${S.ffName}", monospace`;
+    const a=S.adjust[ch];
+    if(a&&((a.scale||1)!==1||(a.dy||0)!==0)) b.classList.add('mod');
+    if(S.adjSel===ch) b.classList.add('selected');
+    b.addEventListener('click',()=>selectAdj(ch));
+    chips.appendChild(b);
+  });
+  const has=S.adjSel && chars.includes(S.adjSel);
+  $('adjCtl').style.display= has?'grid':'none';
+  $('adjPickHint').style.display= has?'none':'block';
+}
+function selectAdj(ch){
+  S.adjSel=ch;
+  const a=S.adjust[ch]||{scale:1,dy:0};
+  $('adjScale').value=Math.round((a.scale||1)*100); $('oScale').textContent=Math.round((a.scale||1)*100);
+  $('adjDy').value=a.dy||0; $('oDy').textContent=a.dy||0;
+  renderAdjustUI();
+}
+$('adjScale').addEventListener('input',()=>{
+  $('oScale').textContent=$('adjScale').value;
+  if(!S.adjSel) return;
+  (S.adjust[S.adjSel]=S.adjust[S.adjSel]||{scale:1,dy:0}).scale=+$('adjScale').value/100;
+  renderAdjustUI();
+});
+$('adjDy').addEventListener('input',()=>{
+  $('oDy').textContent=$('adjDy').value;
+  if(!S.adjSel) return;
+  (S.adjust[S.adjSel]=S.adjust[S.adjSel]||{scale:1,dy:0}).dy=+$('adjDy').value;
+  renderAdjustUI();
+});
+$('btnApplyAdj').addEventListener('click',buildFont);
+$('btnResetGlyph').addEventListener('click',()=>{
+  if(!S.adjSel) return;
+  delete S.adjust[S.adjSel];
+  $('adjScale').value=100; $('oScale').textContent='100';
+  $('adjDy').value=0; $('oDy').textContent='0';
+  renderAdjustUI();
+});
+$('btnResetAll').addEventListener('click',()=>{
+  S.adjust={};
+  $('adjScale').value=100; $('oScale').textContent='100';
+  $('adjDy').value=0; $('oDy').textContent='0';
+  renderAdjustUI();
+});
 
 $('btnDownload').addEventListener('click',()=>{
   if(!S.otfBlob) return;
