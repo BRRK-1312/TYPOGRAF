@@ -1,5 +1,6 @@
 ---
  glyph-sheet-to-font
+ 
 Glifo-orri baten irudia (eskuz edo IAz sortutako letra, zenbaki eta ikurren sareta edo antolaera) OTF letra-tipo funtzional bihurtzea. Erabili hau erabiltzaileak alfabeto/karaktere-multzo oso bat erakusten duen irudi bat igotzen duenean eta "bihurtu hau letra-tipo", "sortu tipografia bat honetatik", "egin hau instalagarri" edo antzekorik eskatzen duenean — nahiz eta "letra-tipo" hitza esplizituki erabili ez. Erabili, halaber, pipeline honekin aurrez eraikitako letra-tipo batek oinarri-lerro, eskala edo lerrokatze arazoak dituenean eta araztu behar denean.
 ---
 
