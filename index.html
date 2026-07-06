@@ -1334,7 +1334,11 @@ if(typeof define === 'function' && define.amd){
   .btnrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
 
   canvas.board{width:100%;height:auto;border:2px solid var(--ink);margin-top:18px;
-               display:none;background:#fff}
+               display:none;background:#fff;cursor:crosshair;user-select:none;touch-action:none}
+  .editbar{display:none;margin-top:12px;border:2px dashed var(--ink);padding:12px 14px;background:#fff}
+  .editbar p{font-size:11.5px;color:#3c3b38;margin:0 0 4px}
+  .editbar .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .editbar button{padding:8px 14px;font-size:11px;box-shadow:2px 2px 0 rgba(16,16,16,.35)}
 
   /* ---------- filas ---------- */
   .rows{display:flex;flex-direction:column;gap:12px;margin-top:6px}
@@ -1388,7 +1392,7 @@ if(typeof define === 'function' && define.amd){
   </div>
   <div class="sub">
     <span data-i18n="sub1">glifo-orria → letra-tipo instalagarria</span>
-    <span class="dim" data-i18n="sub2">SORTU ZURE LETRA TIPOA · CFF/OTF</span>
+    <span class="dim" data-i18n="sub2">osagai konexuak · oinarri-lerroa lerroko · CFF/OTF</span>
   </div>
 </header>
 
@@ -1429,6 +1433,14 @@ if(typeof define === 'function' && define.amd){
     </div>
     <div class="btnrow"><button id="btnDetect" data-i18n="btnDetect">Detektatu glifoak</button></div>
     <canvas class="board" id="board"></canvas>
+    <div class="editbar" id="editBar">
+      <p data-i18n="editHint"></p>
+      <div class="btns">
+        <button class="ghost" id="btnSplit" data-i18n="btnSplit" disabled></button>
+        <button class="ghost" id="btnMergeNext" data-i18n="btnMergeNext" disabled></button>
+        <button class="ghost" id="btnDelBox" data-i18n="btnDelBox" disabled></button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1486,7 +1498,7 @@ const I18N={
 eu:{
   title:'ORRIA→LETRA · glifo-orritik letra-tipora',
   sub1:'glifo-orria → letra-tipo instalagarria',
-  sub2:'SORTU ZURE LETRA TIPOAK',
+  sub2:'osagai konexuak · oinarri-lerroa lerroko · CFF/OTF',
   step1:'1. urratsa',step2:'2. urratsa',step3:'3. urratsa',step4:'4. urratsa',
   h2_1:'Kargatu glifo-orria',
   help1:'Alfabetoa lerrotan marraztuta duen irudi bat (saretarekin edo gabe, tinta ilun edo argia). PNG edo JPG.',
@@ -1519,7 +1531,12 @@ eu:{
   logRow:'{n}. lerroa [{t}] oinarri-lerroa y={y}px · erref.={r}px · eskala={s}',
   logRefInvalid:'{n}. lerroa: erreferentzia baliogabea — lerroa baztertu da.',
   logDup:'  «{c}» bikoiztuta — lehen agerpena gordetzen da.',
-  logBuilt:'Letra-tipoa sortuta: {n} glifo + zuriunea.'
+  logBuilt:'Letra-tipoa sortuta: {n} glifo + zuriunea.',
+  editHint:'Zuzendu detekzioa: klik batez kutxa bat hautatzen da; klik bikoitzak klik-puntuan zatitzen du; arrastatu hutsune batean kutxa berria gehitzeko (detektatu gabeko glifo baterako). Supr teklak hautatutakoa ezabatzen du. Kutxak aldatu ondoren, sakatu «Birdetektatu karaktereak».',
+  btnSplit:'Zatitu klik-puntuan',
+  btnMergeNext:'Batu eskuinekoarekin',
+  btnDelBox:'Ezabatu kutxa',
+  stSplitFail:'Ezin da hor zatitu — alde batean ez dago tintarik.'
 },
 es:{
   title:'HOJA→FUENTE · de hoja de glifos a fuente',
@@ -1557,7 +1574,12 @@ es:{
   logRow:'Fila {n} [{t}] línea base y={y}px · ref={r}px · escala={s}',
   logRefInvalid:'Fila {n}: referencia inválida — fila omitida.',
   logDup:'  «{c}» duplicado — se conserva la primera aparición.',
-  logBuilt:'Fuente generada: {n} glifos + espacio.'
+  logBuilt:'Fuente generada: {n} glifos + espacio.',
+  editHint:'Corregir la detección: un clic selecciona una caja; doble clic la divide en el punto del clic; arrastra sobre un hueco para añadir una caja nueva (para un glifo no detectado). La tecla Supr elimina la seleccionada. Tras editar cajas, pulsa «Redetectar caracteres».',
+  btnSplit:'Dividir en el punto del clic',
+  btnMergeNext:'Unir con el de la derecha',
+  btnDelBox:'Eliminar caja',
+  stSplitFail:'No se puede dividir ahí — uno de los lados no tiene tinta.'
 },
 en:{
   title:'SHEET→FONT · glyph sheet to installable font',
@@ -1595,7 +1617,12 @@ en:{
   logRow:'Row {n} [{t}] baseline y={y}px · ref={r}px · scale={s}',
   logRefInvalid:'Row {n}: invalid reference — row skipped.',
   logDup:'  “{c}” duplicated — first occurrence kept.',
-  logBuilt:'Font generated: {n} glyphs + space.'
+  logBuilt:'Font generated: {n} glyphs + space.',
+  editHint:'Fix the detection: one click selects a box; double-click splits it at the click point; drag over an empty area to add a new box (for an undetected glyph). The Delete key removes the selected box. After editing boxes, press "Re-detect characters".',
+  btnSplit:'Split at click point',
+  btnMergeNext:'Merge with the right one',
+  btnDelBox:'Delete box',
+  stSplitFail:"Can't split there — one side has no ink."
 }};
 let LANG='eu';
 function t(k,p){
@@ -1616,7 +1643,8 @@ document.querySelectorAll('.langbtn').forEach(b=>b.addEventListener('click',()=>
 /* ================= estado ================= */
 const S = {
   img:null, W:0, H:0, gray:null, ink:null,
-  rows:[], font:null, otfBlob:null, fontCounter:0, builtRows:[]
+  rows:[], font:null, otfBlob:null, fontCounter:0, builtRows:[],
+  sel:null, lastClick:null
 };
 const $ = id => document.getElementById(id);
 const logEl = $('log');
@@ -1724,6 +1752,7 @@ $('btnDetect').addEventListener('click',()=>{
     const comps=componentsInBand(y0,y1,minArea);
     return {y0,y1,glyphs:mergeByProximity(comps,gap)};
   }).filter(r=>r.glyphs.length>0);
+  S.sel=null;
   drawBoard(); buildRowsUI();
   $('stepMap').style.display='block';
 });
@@ -1742,7 +1771,148 @@ function drawBoard(){
     ctx.font=`bold ${Math.max(14,S.W/50)}px monospace`;
     ctx.fillText(t('rowN',{n:i+1})+' · '+r.glyphs.length, 6, r.y0-4>14?r.y0-6:r.y0+18);
   });
+  if(S.sel && S.rows[S.sel.ri] && S.rows[S.sel.ri].glyphs[S.sel.gi]){
+    const g=S.rows[S.sel.ri].glyphs[S.sel.gi];
+    ctx.strokeStyle='#d02f18'; ctx.lineWidth=Math.max(2,S.W/400);
+    ctx.strokeRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+    ctx.fillStyle='rgba(208,47,24,.16)';
+    ctx.fillRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+  }
+  if(dragRect){
+    ctx.setLineDash([7,5]);
+    ctx.strokeStyle='#d02f18'; ctx.lineWidth=Math.max(1.5,S.W/600);
+    ctx.strokeRect(dragRect.x0,dragRect.y0,dragRect.x1-dragRect.x0,dragRect.y1-dragRect.y0);
+    ctx.setLineDash([]);
+  }
+  $('editBar').style.display='block';
 }
+
+/* ================= edición de cajas (zuzendu detekzioa) ================= */
+const board=$('board');
+let dragStart=null, dragRect=null;
+
+function imgCoords(e){
+  const r=board.getBoundingClientRect();
+  return { x:(e.clientX-r.left)*board.width/r.width,
+           y:(e.clientY-r.top)*board.height/r.height };
+}
+function hitTest(x,y){
+  for(let ri=0;ri<S.rows.length;ri++){
+    const gs=S.rows[ri].glyphs;
+    for(let gi=0;gi<gs.length;gi++){
+      const g=gs[gi];
+      if(x>=g.x0-3&&x<=g.x1+3&&y>=g.y0-3&&y<=g.y1+3) return {ri,gi};
+    }
+  }
+  return null;
+}
+function tightBBox(x0,y0,x1,y1){ // ajusta un rectángulo a la tinta que contiene
+  x0=Math.max(0,Math.round(x0)); y0=Math.max(0,Math.round(y0));
+  x1=Math.min(S.W,Math.round(x1)); y1=Math.min(S.H,Math.round(y1));
+  let mx0=1e9,my0=1e9,mx1=-1,my1=-1;
+  for(let y=y0;y<y1;y++){const o=y*S.W;
+    for(let x=x0;x<x1;x++) if(S.ink[o+x]){
+      if(x<mx0)mx0=x; if(x>mx1)mx1=x; if(y<my0)my0=y; if(y>my1)my1=y; }}
+  if(mx1<0) return null;
+  return {x0:mx0,y0:my0,x1:mx1+1,y1:my1+1};
+}
+function updateEditButtons(){
+  const on=!!S.sel;
+  ['btnSplit','btnMergeNext','btnDelBox'].forEach(id=>$(id).disabled=!on);
+}
+function afterGlyphEdit(ri){
+  S.rows[ri].glyphs.sort((a,b)=>a.x0-b.x0);
+  updateCount(ri); drawBoard();
+}
+function deleteBox(){
+  if(!S.sel) return;
+  const {ri,gi}=S.sel;
+  S.rows[ri].glyphs.splice(gi,1);
+  S.sel=null; updateEditButtons();
+  if(S.rows[ri].glyphs.length===0){ S.rows.splice(ri,1); drawBoard(); buildRowsUI(); }
+  else afterGlyphEdit(ri);
+}
+function splitBoxAt(x){
+  if(!S.sel) return;
+  const {ri,gi}=S.sel, g=S.rows[ri].glyphs[gi];
+  const xs=Math.round(x);
+  if(xs<=g.x0+1||xs>=g.x1-1){ status(t('stSplitFail'),true); return; }
+  const L=tightBBox(g.x0,g.y0,xs,g.y1), R=tightBBox(xs,g.y0,g.x1,g.y1);
+  if(!L||!R){ status(t('stSplitFail'),true); return; }
+  S.rows[ri].glyphs.splice(gi,1,L,R);
+  S.sel=null; updateEditButtons(); afterGlyphEdit(ri);
+}
+function mergeNext(){
+  if(!S.sel) return;
+  const {ri,gi}=S.sel, gs=S.rows[ri].glyphs;
+  if(gi+1>=gs.length) return;
+  const a=gs[gi], b=gs[gi+1];
+  const m={x0:Math.min(a.x0,b.x0),y0:Math.min(a.y0,b.y0),
+           x1:Math.max(a.x1,b.x1),y1:Math.max(a.y1,b.y1)};
+  gs.splice(gi,2,m);
+  S.sel={ri,gi:gs.indexOf(m)};
+  afterGlyphEdit(ri); updateEditButtons();
+}
+function addBox(rect){
+  const tight=tightBBox(rect.x0,rect.y0,rect.x1,rect.y1) ||
+    {x0:Math.round(rect.x0),y0:Math.round(rect.y0),
+     x1:Math.round(rect.x1),y1:Math.round(rect.y1)};
+  const cy=(tight.y0+tight.y1)/2;
+  let ri=S.rows.findIndex(r=>cy>=r.y0&&cy<=r.y1);
+  if(ri<0){ // fila con mayor solape vertical, o fila nueva si no hay ninguno
+    let bestOv=0;
+    S.rows.forEach((r,i)=>{ const ov=Math.min(r.y1,tight.y1)-Math.max(r.y0,tight.y0);
+      if(ov>bestOv){bestOv=ov;ri=i;} });
+    if(bestOv<=0){
+      S.rows.push({y0:Math.max(0,tight.y0-4),y1:Math.min(S.H,tight.y1+4),glyphs:[tight]});
+      S.rows.sort((a,b)=>a.y0-b.y0);
+      S.sel=null; updateEditButtons(); drawBoard(); buildRowsUI(); return;
+    }
+  }
+  const r=S.rows[ri];
+  r.y0=Math.min(r.y0,tight.y0); r.y1=Math.max(r.y1,tight.y1);
+  r.glyphs.push(tight);
+  r.glyphs.sort((a,b)=>a.x0-b.x0);
+  S.sel={ri,gi:r.glyphs.indexOf(tight)};
+  updateEditButtons(); updateCount(ri); drawBoard();
+}
+
+board.addEventListener('mousedown',e=>{
+  if(!S.rows.length) return;
+  e.preventDefault();
+  const p=imgCoords(e);
+  const hit=hitTest(p.x,p.y);
+  if(hit){ S.sel=hit; S.lastClick=p; updateEditButtons(); drawBoard(); dragStart=null; }
+  else { dragStart=p; dragRect=null; }
+});
+board.addEventListener('mousemove',e=>{
+  if(!dragStart) return;
+  const p=imgCoords(e);
+  dragRect={x0:Math.min(dragStart.x,p.x),y0:Math.min(dragStart.y,p.y),
+            x1:Math.max(dragStart.x,p.x),y1:Math.max(dragStart.y,p.y)};
+  drawBoard();
+});
+window.addEventListener('mouseup',()=>{
+  if(!dragStart) return;
+  const r=dragRect; dragStart=null; dragRect=null;
+  if(r && (r.x1-r.x0)>8 && (r.y1-r.y0)>8) addBox(r);
+  else { S.sel=null; updateEditButtons(); }
+  drawBoard();
+});
+board.addEventListener('dblclick',e=>{
+  const p=imgCoords(e);
+  const hit=hitTest(p.x,p.y);
+  if(hit){ S.sel=hit; splitBoxAt(p.x); }
+});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Delete'||e.key==='Backspace') && S.sel &&
+     !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){
+    e.preventDefault(); deleteBox();
+  }
+});
+$('btnDelBox').addEventListener('click',deleteBox);
+$('btnMergeNext').addEventListener('click',mergeNext);
+$('btnSplit').addEventListener('click',()=>{ if(S.sel&&S.lastClick) splitBoxAt(S.lastClick.x); });
 
 /* ================= paso 3: mapeo ================= */
 function guessChars(n){
