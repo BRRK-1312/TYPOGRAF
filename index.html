@@ -1456,6 +1456,7 @@ if(typeof define === 'function' && define.amd){
       <div class="btns">
         <button class="ghost" id="btnSplit" data-i18n="btnSplit" disabled></button>
         <button class="ghost" id="btnMergeNext" data-i18n="btnMergeNext" disabled></button>
+        <button class="ghost" id="btnPoly" data-i18n="btnPolyDraw" disabled></button>
         <button class="ghost" id="btnDelBox" data-i18n="btnDelBox" disabled></button>
       </div>
     </div>
@@ -1500,9 +1501,9 @@ if(typeof define === 'function' && define.amd){
       <p class="help" id="adjPickHint" data-i18n="adjPick"></p>
       <div class="adjctl" id="adjCtl" style="display:none">
         <div class="ctl"><label><span data-i18n="lblScale"></span> <output id="oScale">100</output>%</label>
-          <input type="range" id="adjScale" min="50" max="150" value="100"></div>
+          <input type="range" id="adjScale" min="20" max="300" value="100"></div>
         <div class="ctl"><label><span data-i18n="lblDy"></span> <output id="oDy">0</output></label>
-          <input type="range" id="adjDy" min="-200" max="200" step="5" value="0"></div>
+          <input type="range" id="adjDy" min="-400" max="400" step="5" value="0"></div>
         <div class="btns">
           <button id="btnApplyAdj" data-i18n="btnApplyAdj"></button>
           <button class="ghost" id="btnResetGlyph" data-i18n="btnResetGlyph"></button>
@@ -1567,10 +1568,16 @@ eu:{
   logRefInvalid:'{n}. lerroa: erreferentzia baliogabea — lerroa baztertu da.',
   logDup:'  «{c}» bikoiztuta — lehen agerpena gordetzen da.',
   logBuilt:'Letra-tipoa sortuta: {n} glifo + zuriunea.',
-  editHint:'Zuzendu detekzioa: klik batez kutxa bat hautatzen da; klik bikoitzak klik-puntuan zatitzen du; arrastatu hutsune batean kutxa berria gehitzeko (detektatu gabeko glifo baterako). Supr teklak hautatutakoa ezabatzen du. Kutxak aldatu ondoren, sakatu «Birdetektatu karaktereak».',
+  editHint:'Zuzendu detekzioa: klik batez kutxa bat hautatzen da; klik bikoitzak klik-puntuan zatitzen du; arrastatu hutsune batean kutxa berria gehitzeko (detektatu gabeko glifo baterako). Supr teklak hautatutakoa ezabatzen du. «Marraztu ingerada askea» botoiak hautatutako kutxa poligono batez mugatzen du, ondoko letren zatiak kanpoan uzteko; ingerada baten barruko tinta bere glifoarentzat gordetzen da soilik, eta ondoko kutxek ez dute aintzat hartzen. Kutxak aldatu ondoren, sakatu «Birdetektatu karaktereak».',
   btnSplit:'Zatitu klik-puntuan',
   btnMergeNext:'Batu eskuinekoarekin',
   btnDelBox:'Ezabatu kutxa',
+  btnPolyDraw:'Marraztu ingerada askea',
+  btnPolyClear:'Kendu ingerada',
+  btnPolyClose:'Itxi ingerada',
+  stPolyDrawing:'Egin klik erpinak gehitzeko; ixteko: klik lehen erpinean, klik bikoitza, Enter edo «Itxi ingerada» botoia. Esc-ek bertan behera uzten du.',
+  stPolyClosed:'Ingerada aplikatuta — hurrengo glifoa hautatuta.',
+  stPolyFail:'Ingeradak ez du tintarik — baztertu da.',
   stSplitFail:'Ezin da hor zatitu — alde batean ez dago tintarik.',
   adjTitle:'Glifoz glifoko doikuntzak',
   adjHelp:'Letraren bat besteak baino handiago edo txikiago geratzen bada, hautatu behean eta zuzendu bere tamaina (eta posizio bertikala, flotatzen badu edo hondoratzen bada). Doikuntzak birsortzean aplikatzen dira eta birsortzeen artean gordetzen dira. Gorriz markatutakoek doikuntza dute.',
@@ -1615,10 +1622,16 @@ es:{
   logRefInvalid:'Fila {n}: referencia inválida — fila omitida.',
   logDup:'  «{c}» duplicado — se conserva la primera aparición.',
   logBuilt:'Fuente generada: {n} glifos + espacio.',
-  editHint:'Corregir la detección: un clic selecciona una caja; doble clic la divide en el punto del clic; arrastra sobre un hueco para añadir una caja nueva (para un glifo no detectado). La tecla Supr elimina la seleccionada. Tras editar cajas, pulsa «Redetectar caracteres».',
+  editHint:'Corregir la detección: un clic selecciona una caja; doble clic la divide en el punto del clic; arrastra sobre un hueco para añadir una caja nueva (para un glifo no detectado). La tecla Supr elimina la seleccionada. El botón «Dibujar contorno libre» recorta la caja seleccionada con un polígono; la tinta dentro de un contorno queda reservada en exclusiva para su glifo y las cajas vecinas la ignoran. Tras editar cajas, pulsa «Redetectar caracteres».',
   btnSplit:'Dividir en el punto del clic',
   btnMergeNext:'Unir con el de la derecha',
   btnDelBox:'Eliminar caja',
+  btnPolyDraw:'Dibujar contorno libre',
+  btnPolyClear:'Quitar contorno',
+  btnPolyClose:'Cerrar contorno',
+  stPolyDrawing:'Haz clic para añadir vértices; para cerrar: clic en el primer vértice, doble clic, Enter o el botón «Cerrar contorno». Esc cancela.',
+  stPolyClosed:'Contorno aplicado — seleccionado el siguiente glifo.',
+  stPolyFail:'El contorno no contiene tinta — descartado.',
   stSplitFail:'No se puede dividir ahí — uno de los lados no tiene tinta.',
   adjTitle:'Ajustes por glifo',
   adjHelp:'Si alguna letra queda más grande o más pequeña que el resto, selecciónala abajo y corrige su tamaño (y su posición vertical si flota o se hunde). Los ajustes se aplican al regenerar y se conservan entre regeneraciones. Las marcadas en rojo tienen ajuste.',
@@ -1663,10 +1676,16 @@ en:{
   logRefInvalid:'Row {n}: invalid reference — row skipped.',
   logDup:'  “{c}” duplicated — first occurrence kept.',
   logBuilt:'Font generated: {n} glyphs + space.',
-  editHint:'Fix the detection: one click selects a box; double-click splits it at the click point; drag over an empty area to add a new box (for an undetected glyph). The Delete key removes the selected box. After editing boxes, press "Re-detect characters".',
+  editHint:'Fix the detection: one click selects a box; double-click splits it at the click point; drag over an empty area to add a new box (for an undetected glyph). The Delete key removes the selected box. The "Draw free outline" button clips the selected box with a polygon; ink inside an outline is reserved exclusively for its glyph and neighbouring boxes ignore it. After editing boxes, press "Re-detect characters".',
   btnSplit:'Split at click point',
   btnMergeNext:'Merge with the right one',
   btnDelBox:'Delete box',
+  btnPolyDraw:'Draw free outline',
+  btnPolyClear:'Remove outline',
+  btnPolyClose:'Close outline',
+  stPolyDrawing:'Click to add vertices; to close: click the first vertex, double-click, Enter, or the "Close outline" button. Esc cancels.',
+  stPolyClosed:'Outline applied — next glyph selected.',
+  stPolyFail:'The outline contains no ink — discarded.',
   stSplitFail:"Can't split there — one side has no ink.",
   adjTitle:'Per-glyph adjustments',
   adjHelp:'If a letter ends up larger or smaller than the rest, select it below and correct its size (and vertical position if it floats or sinks). Adjustments are applied on regeneration and persist across regenerations. Red-marked chips have an adjustment.',
@@ -1817,7 +1836,13 @@ function drawBoard(){
     ctx.strokeStyle='rgba(208,47,24,.55)';
     ctx.strokeRect(0,r.y0,S.W,r.y1-r.y0);
     ctx.strokeStyle='#1d7a46';
-    r.glyphs.forEach(g=>ctx.strokeRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0));
+    r.glyphs.forEach(g=>{
+      if(g.poly){
+        ctx.beginPath();
+        g.poly.forEach((p,k)=> k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+        ctx.closePath(); ctx.stroke();
+      } else ctx.strokeRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+    });
     ctx.fillStyle='#d02f18';
     ctx.font=`bold ${Math.max(14,S.W/50)}px monospace`;
     ctx.fillText(t('rowN',{n:i+1})+' · '+r.glyphs.length, 6, r.y0-4>14?r.y0-6:r.y0+18);
@@ -1825,9 +1850,15 @@ function drawBoard(){
   if(S.sel && S.rows[S.sel.ri] && S.rows[S.sel.ri].glyphs[S.sel.gi]){
     const g=S.rows[S.sel.ri].glyphs[S.sel.gi];
     ctx.strokeStyle='#d02f18'; ctx.lineWidth=Math.max(2,S.W/400);
-    ctx.strokeRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
     ctx.fillStyle='rgba(208,47,24,.16)';
-    ctx.fillRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+    if(g.poly){
+      ctx.beginPath();
+      g.poly.forEach((p,k)=> k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+      ctx.closePath(); ctx.stroke(); ctx.fill();
+    }else{
+      ctx.strokeRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+      ctx.fillRect(g.x0,g.y0,g.x1-g.x0,g.y1-g.y0);
+    }
   }
   if(dragRect){
     ctx.setLineDash([7,5]);
@@ -1835,12 +1866,88 @@ function drawBoard(){
     ctx.strokeRect(dragRect.x0,dragRect.y0,dragRect.x1-dragRect.x0,dragRect.y1-dragRect.y0);
     ctx.setLineDash([]);
   }
+  if(polyPts && polyPts.length){
+    const R=Math.max(8,S.W/120);
+    ctx.setLineDash([6,4]);
+    ctx.strokeStyle='#d02f18'; ctx.lineWidth=Math.max(1.5,S.W/600);
+    ctx.beginPath();
+    polyPts.forEach((p,k)=> k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+    if(polyCursor) ctx.lineTo(polyCursor.x,polyCursor.y);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#d02f18';
+    const rad=Math.max(2.5,S.W/300);
+    polyPts.forEach(p=>{ ctx.beginPath(); ctx.arc(p[0],p[1],rad,0,7); ctx.fill(); });
+    // primer vértice: anillo de cierre; verde cuando el cursor está a distancia de cierre
+    const near=polyCursor && polyPts.length>=3 &&
+               Math.hypot(polyCursor.x-polyPts[0][0],polyCursor.y-polyPts[0][1])<R;
+    ctx.beginPath(); ctx.arc(polyPts[0][0],polyPts[0][1], near?R:R*0.7, 0, 7);
+    ctx.lineWidth=Math.max(2,S.W/450);
+    ctx.strokeStyle= near?'#1d7a46':'#d02f18';
+    ctx.stroke();
+  }
   $('editBar').style.display='block';
 }
 
 /* ================= edición de cajas (zuzendu detekzioa) ================= */
 const board=$('board');
-let dragStart=null, dragRect=null;
+let dragStart=null, dragRect=null, polyPts=null, polyCursor=null;
+
+function updateEditButtons(){
+  const on=!!S.sel;
+  ['btnSplit','btnMergeNext','btnDelBox'].forEach(id=>$(id).disabled=!on||!!polyPts);
+  $('btnPoly').disabled=!on;
+  const g=on && S.rows[S.sel.ri] ? S.rows[S.sel.ri].glyphs[S.sel.gi] : null;
+  const key= polyPts ? 'btnPolyClose' : (g&&g.poly) ? 'btnPolyClear' : 'btnPolyDraw';
+  const bp=$('btnPoly'); bp.dataset.i18n=key; bp.textContent=t(key);
+}
+function startPoly(){
+  if(!S.sel) return;
+  polyPts=[]; polyCursor=null;
+  status(t('stPolyDrawing')); updateEditButtons(); drawBoard();
+}
+function cancelPoly(){ polyPts=null; polyCursor=null; status(''); updateEditButtons(); drawBoard(); }
+function finishPoly(){
+  if(!polyPts) return;
+  // el doble clic mete vértices casi idénticos al final: depurar
+  while(polyPts.length>1){
+    const a=polyPts[polyPts.length-1], b=polyPts[polyPts.length-2];
+    if(Math.hypot(a[0]-b[0],a[1]-b[1])<6) polyPts.pop(); else break;
+  }
+  if(polyPts.length<3){ cancelPoly(); return; }
+  const {ri,gi}=S.sel, g=S.rows[ri].glyphs[gi];
+  const poly=polyPts.map(p=>[p[0],p[1]]);
+  polyPts=null; polyCursor=null;
+  // bbox del polígono, y dentro de él, bbox ajustada a la tinta interior
+  let px0=1e9,py0=1e9,px1=-1,py1=-1;
+  poly.forEach(p=>{ if(p[0]<px0)px0=p[0]; if(p[0]>px1)px1=p[0];
+                    if(p[1]<py0)py0=p[1]; if(p[1]>py1)py1=p[1]; });
+  px0=Math.max(0,Math.floor(px0)); py0=Math.max(0,Math.floor(py0));
+  px1=Math.min(S.W,Math.ceil(px1)); py1=Math.min(S.H,Math.ceil(py1));
+  const others=otherPolys(g), gTmp={poly};
+  let mx0=1e9,my0=1e9,mx1=-1,my1=-1;
+  for(let y=py0;y<py1;y++){
+    for(let x=px0;x<px1;x++)
+      if(glyphInk(gTmp,x,y,others)){
+        if(x<mx0)mx0=x; if(x>mx1)mx1=x; if(y<my0)my0=y; if(y>my1)my1=y; }}
+  if(mx1<0){ status(t('stPolyFail'),true); updateEditButtons(); drawBoard(); return; }
+  g.x0=mx0; g.y0=my0; g.x1=mx1+1; g.y1=my1+1; g.poly=poly;
+  retightenRow(ri); // las cajas vecinas sueltan la tinta reclamada por el nuevo contorno
+  afterGlyphEdit(ri);
+  // encadenar: seleccionar el siguiente glifo (o el primero de la fila siguiente)
+  const gs=S.rows[ri].glyphs, gi2=gs.indexOf(g);
+  if(gi2+1<gs.length) S.sel={ri,gi:gi2+1};
+  else if(ri+1<S.rows.length && S.rows[ri+1].glyphs.length) S.sel={ri:ri+1,gi:0};
+  else S.sel={ri,gi:gi2};
+  status(t('stPolyClosed'));
+  updateEditButtons(); drawBoard();
+}
+$('btnPoly').addEventListener('click',()=>{
+  if(!S.sel) return;
+  if(polyPts){ if(polyPts.length>=3) finishPoly(); else cancelPoly(); return; }
+  const g=S.rows[S.sel.ri].glyphs[S.sel.gi];
+  if(g.poly){ delete g.poly; afterGlyphEdit(S.sel.ri); updateEditButtons(); return; }
+  startPoly();
+});
 
 function imgCoords(e){
   const r=board.getBoundingClientRect();
@@ -1867,9 +1974,46 @@ function tightBBox(x0,y0,x1,y1){ // ajusta un rectángulo a la tinta que contien
   if(mx1<0) return null;
   return {x0:mx0,y0:my0,x1:mx1+1,y1:my1+1};
 }
-function updateEditButtons(){
-  const on=!!S.sel;
-  ['btnSplit','btnMergeNext','btnDelBox'].forEach(id=>$(id).disabled=!on);
+function pointInPoly(x,y,poly){ // ray casting (paridad de cruces)
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+    if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function glyphInk(g,ax,ay,others){ // tinta del glifo: respeta su contorno y excluye la reclamada por contornos ajenos
+  if(!S.ink[ay*S.W+ax]) return 0;
+  const px=ax+0.5, py=ay+0.5;
+  if(g.poly && !pointInPoly(px,py,g.poly)) return 0;
+  if(others) for(const q of others)
+    if(px>=q.bx0&&px<=q.bx1&&py>=q.by0&&py<=q.by1&&pointInPoly(px,py,q.poly)) return 0;
+  return 1;
+}
+function otherPolys(g){ // contornos de los demás glifos de la fila de g (reservan su tinta en exclusiva)
+  const out=[];
+  for(const r of S.rows){
+    if(!r.glyphs.includes(g)) continue;
+    for(const q of r.glyphs){
+      if(q===g||!q.poly) continue;
+      let bx0=1e9,by0=1e9,bx1=-1,by1=-1;
+      q.poly.forEach(p=>{ if(p[0]<bx0)bx0=p[0]; if(p[0]>bx1)bx1=p[0];
+                          if(p[1]<by0)by0=p[1]; if(p[1]>by1)by1=p[1]; });
+      out.push({poly:q.poly,bx0,by0,bx1,by1});
+    }
+    break;
+  }
+  return out;
+}
+function retightenRow(ri){ // re-encoge cada caja de la fila a su tinta propia (tras cambiar contornos)
+  S.rows[ri].glyphs.forEach(q=>{
+    const others=otherPolys(q);
+    let mx0=1e9,my0=1e9,mx1=-1,my1=-1;
+    for(let y=q.y0;y<q.y1;y++)for(let x=q.x0;x<q.x1;x++)
+      if(glyphInk(q,x,y,others)){
+        if(x<mx0)mx0=x; if(x>mx1)mx1=x; if(y<my0)my0=y; if(y>my1)my1=y; }
+    if(mx1>=0){ q.x0=mx0; q.y0=my0; q.x1=mx1+1; q.y1=my1+1; }
+  });
 }
 function afterGlyphEdit(ri){
   S.rows[ri].glyphs.sort((a,b)=>a.x0-b.x0);
@@ -1932,11 +2076,17 @@ board.addEventListener('mousedown',e=>{
   if(!S.rows.length) return;
   e.preventDefault();
   const p=imgCoords(e);
+  if(polyPts){
+    const R=Math.max(8,S.W/120);
+    if(polyPts.length>=3 && Math.hypot(p.x-polyPts[0][0],p.y-polyPts[0][1])<R){ finishPoly(); return; }
+    polyPts.push([p.x,p.y]); polyCursor=p; drawBoard(); return;
+  }
   const hit=hitTest(p.x,p.y);
   if(hit){ S.sel=hit; S.lastClick=p; updateEditButtons(); drawBoard(); dragStart=null; }
   else { dragStart=p; dragRect=null; }
 });
 board.addEventListener('mousemove',e=>{
+  if(polyPts){ polyCursor=imgCoords(e); drawBoard(); return; }
   if(!dragStart) return;
   const p=imgCoords(e);
   dragRect={x0:Math.min(dragStart.x,p.x),y0:Math.min(dragStart.y,p.y),
@@ -1951,11 +2101,17 @@ window.addEventListener('mouseup',()=>{
   drawBoard();
 });
 board.addEventListener('dblclick',e=>{
+  if(polyPts){ finishPoly(); return; }
   const p=imgCoords(e);
   const hit=hitTest(p.x,p.y);
   if(hit){ S.sel=hit; splitBoxAt(p.x); }
 });
 document.addEventListener('keydown',e=>{
+  if(polyPts){
+    if(e.key==='Enter'){ e.preventDefault(); finishPoly(); }
+    else if(e.key==='Escape'){ e.preventDefault(); cancelPoly(); }
+    return;
+  }
   if((e.key==='Delete'||e.key==='Backspace') && S.sel &&
      !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){
     e.preventDefault(); deleteBox();
@@ -2091,7 +2247,8 @@ function buildTemplates(){
 
 function glyphFeatures(g,baseline,capRef){
   const w=g.x1-g.x0, h=g.y1-g.y0;
-  return { vec:normVec((x,y)=>S.ink[(g.y0+y)*S.W+(g.x0+x)],w,h),
+  const others=otherPolys(g);
+  return { vec:normVec((x,y)=>glyphInk(g,g.x0+x,g.y0+y,others),w,h),
            ar:w/h, relH:h/capRef, vbot:(g.y1-baseline)/capRef };
 }
 
@@ -2166,9 +2323,10 @@ function cropToImageData(g){
   const x0=Math.max(0,g.x0-PAD), y0=Math.max(0,g.y0-PAD);
   const x1=Math.min(S.W,g.x1+PAD), y1=Math.min(S.H,g.y1+PAD);
   const w=x1-x0,h=y1-y0;
+  const others=otherPolys(g);
   const id=new ImageData(w,h);
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-    const v=S.ink[(y+y0)*S.W+(x+x0)]?0:255, p=(y*w+x)*4;
+    const v=glyphInk(g,x+x0,y+y0,others)?0:255, p=(y*w+x)*4;
     id.data[p]=id.data[p+1]=id.data[p+2]=v; id.data[p+3]=255;
   }
   return {id,cx0:x0,cy0:y0};
