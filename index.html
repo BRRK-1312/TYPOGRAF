@@ -1344,7 +1344,11 @@ if(typeof define === 'function' && define.amd){
   .adjust{border:2px solid var(--ink);padding:16px 18px;margin-top:14px;background:#fff}
   .adjust h3{font-family:var(--disp);font-weight:900;text-transform:uppercase;
              font-size:15px;letter-spacing:.02em;margin-bottom:4px}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+  .chips{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+  .chiprow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .rowselect{font-size:10.5px;padding:6px 10px;background:#fff;color:var(--ink);
+             border:2px dashed var(--ink);box-shadow:none;letter-spacing:.08em}
+  .rowselect:hover{background:var(--ink);color:var(--paper)}
   .chip{min-width:44px;height:50px;font-size:27px;line-height:1;display:flex;
         align-items:center;justify-content:center;background:#fff;color:var(--ink);
         border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(16,16,16,.3);
@@ -1580,7 +1584,7 @@ eu:{
   stPolyFail:'Ingeradak ez du tintarik — baztertu da.',
   stSplitFail:'Ezin da hor zatitu — alde batean ez dago tintarik.',
   adjTitle:'Glifoz glifoko doikuntzak',
-  adjHelp:'Letraren bat besteak baino handiago edo txikiago geratzen bada, hautatu behean eta zuzendu bere tamaina (eta posizio bertikala, flotatzen badu edo hondoratzen bada). Doikuntzak birsortzean aplikatzen dira eta birsortzeen artean gordetzen dira. Gorriz markatutakoek doikuntza dute.',
+  adjHelp:'Letraren bat besteak baino handiago edo txikiago geratzen bada, hautatu behean eta zuzendu bere tamaina (eta posizio bertikala, flotatzen badu edo hondoratzen bada). Maius+klik eginez batzuk batera hauta ditzakezu, eta lerro bakoitzeko botoiak lerro osoa hautatzen du. Doikuntzak birsortzean aplikatzen dira eta birsortzeen artean gordetzen dira. Gorriz markatutakoek doikuntza dute.',
   adjPick:'Aukeratu glifo bat doitzeko.',
   lblScale:'Tamaina',lblDy:'Desplazamendu bertikala (unitateak)',
   btnApplyAdj:'Aplikatu eta birsortu',btnResetGlyph:'Berrezarri glifoa',btnResetAll:'Berrezarri dena'
@@ -1634,7 +1638,7 @@ es:{
   stPolyFail:'El contorno no contiene tinta — descartado.',
   stSplitFail:'No se puede dividir ahí — uno de los lados no tiene tinta.',
   adjTitle:'Ajustes por glifo',
-  adjHelp:'Si alguna letra queda más grande o más pequeña que el resto, selecciónala abajo y corrige su tamaño (y su posición vertical si flota o se hunde). Los ajustes se aplican al regenerar y se conservan entre regeneraciones. Las marcadas en rojo tienen ajuste.',
+  adjHelp:'Si alguna letra queda más grande o más pequeña que el resto, selecciónala abajo y corrige su tamaño (y su posición vertical si flota o se hunde). Con Mayús+clic seleccionas varias a la vez, y el botón de cada fila selecciona la fila entera. Los ajustes se aplican al regenerar y se conservan entre regeneraciones. Las marcadas en rojo tienen ajuste.',
   adjPick:'Elige un glifo para ajustarlo.',
   lblScale:'Tamaño',lblDy:'Desplazamiento vertical (unidades)',
   btnApplyAdj:'Aplicar y regenerar',btnResetGlyph:'Restablecer glifo',btnResetAll:'Restablecer todo'
@@ -1688,7 +1692,7 @@ en:{
   stPolyFail:'The outline contains no ink — discarded.',
   stSplitFail:"Can't split there — one side has no ink.",
   adjTitle:'Per-glyph adjustments',
-  adjHelp:'If a letter ends up larger or smaller than the rest, select it below and correct its size (and vertical position if it floats or sinks). Adjustments are applied on regeneration and persist across regenerations. Red-marked chips have an adjustment.',
+  adjHelp:'If a letter ends up larger or smaller than the rest, select it below and correct its size (and vertical position if it floats or sinks). Shift+click selects several at once, and each row button selects the whole row. Adjustments are applied on regeneration and persist across regenerations. Red-marked chips have an adjustment.',
   adjPick:'Pick a glyph to adjust.',
   lblScale:'Size',lblDy:'Vertical offset (units)',
   btnApplyAdj:'Apply and regenerate',btnResetGlyph:'Reset glyph',btnResetAll:'Reset all'
@@ -1714,7 +1718,7 @@ const S = {
   img:null, W:0, H:0, gray:null, ink:null,
   rows:[], font:null, otfBlob:null, fontCounter:0, builtRows:[],
   sel:null, lastClick:null,
-  adjust:{}, adjSel:null, ffName:null
+  adjust:{}, adjSel:new Set(), ffName:null
 };
 const $ = id => document.getElementById(id);
 const logEl = $('log');
@@ -2186,6 +2190,21 @@ function robustMode(values,tol=5){
   if(cur.length>best.length)best=cur;
   return best.reduce((a,b)=>a+b,0)/best.length;
 }
+function xHeightTop(values,tol=5){
+  // en minúsculas la moda de topes puede caer en los ascendentes (b,d,f,h,k,l);
+  // aquí se elige el grupo MÁS BAJO (mayor y) con presencia suficiente: la altura x
+  const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const s=[...values].sort((a,b)=>a-b);
+  const groups=[]; let cur=[s[0]];
+  for(let i=1;i<s.length;i++){
+    if(s[i]-cur[cur.length-1]<=tol) cur.push(s[i]);
+    else{ groups.push(cur); cur=[s[i]]; }
+  }
+  groups.push(cur);
+  const minN=Math.max(2,Math.ceil(values.length*0.25));
+  const cand=groups.filter(g=>g.length>=minN);
+  return mean((cand.length?cand:groups).reduce((a,b)=> mean(b)>mean(a)?b:a));
+}
 
 /* ================= autodetección de caracteres ================= */
 const REF_FONTS=['Arial','Verdana','Georgia','Times New Roman','Courier New'];
@@ -2391,7 +2410,8 @@ async function buildFont(){
         let tallest=gl[0]; for(const g of gl) if((g.y1-g.y0)>(tallest.y1-tallest.y0)) tallest=g;
         ref=baseline-tallest.y0; target=700;
       }else{
-        ref=baseline-robustMode(tops); target=(type==='lower')?500:700;
+        const topRef = (type==='lower') ? xHeightTop(tops) : robustMode(tops);
+        ref=baseline-topRef; target=(type==='lower')?500:700;
       }
       if(ref<=0){ log(t('logRefInvalid',{n:ri+1})); return; }
       const scale=target/ref;
@@ -2469,57 +2489,86 @@ function renderValidation(){
   });
 }
 
-/* ================= ajustes por glifo ================= */
+/* ================= ajustes por glifo (multi-selección) ================= */
 function renderAdjustUI(){
   const panel=$('adjustPanel'); panel.style.display='block';
   const chips=$('adjChips'); chips.innerHTML='';
-  const chars=[...new Set([...S.builtRows.join('')])];
-  chars.forEach(ch=>{
-    const b=document.createElement('button');
-    b.type='button'; b.className='chip'; b.textContent=ch;
-    b.style.fontFamily=`"${S.ffName}", monospace`;
-    const a=S.adjust[ch];
-    if(a&&((a.scale||1)!==1||(a.dy||0)!==0)) b.classList.add('mod');
-    if(S.adjSel===ch) b.classList.add('selected');
-    b.addEventListener('click',()=>selectAdj(ch));
-    chips.appendChild(b);
+  const seen=new Set();
+  S.builtRows.forEach((rowStr,ri)=>{
+    const rowChars=[...rowStr].filter(c=>{ if(seen.has(c)) return false; seen.add(c); return true; });
+    if(!rowChars.length) return;
+    const line=document.createElement('div'); line.className='chiprow';
+    const rb=document.createElement('button');
+    rb.type='button'; rb.className='rowselect';
+    rb.textContent=t('rowN',{n:ri+1});
+    rb.addEventListener('click',ev=>selectAdjRow(rowChars,ev));
+    line.appendChild(rb);
+    rowChars.forEach(ch=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip'; b.textContent=ch; b.dataset.ch=ch;
+      b.style.fontFamily=`"${S.ffName}", monospace`;
+      b.addEventListener('click',ev=>selectAdj(ch,ev));
+      line.appendChild(b);
+    });
+    chips.appendChild(line);
   });
-  const has=S.adjSel && chars.includes(S.adjSel);
+  updateChipMods();
+  const has=S.adjSel.size>0;
   $('adjCtl').style.display= has?'grid':'none';
   $('adjPickHint').style.display= has?'none':'block';
 }
-function selectAdj(ch){
-  S.adjSel=ch;
-  const a=S.adjust[ch]||{scale:1,dy:0};
-  $('adjScale').value=Math.round((a.scale||1)*100); $('oScale').textContent=Math.round((a.scale||1)*100);
-  $('adjDy').value=a.dy||0; $('oDy').textContent=a.dy||0;
-  renderAdjustUI();
+function updateChipMods(){
+  document.querySelectorAll('#adjChips .chip').forEach(b=>{
+    const ch=b.dataset.ch, a=S.adjust[ch];
+    b.classList.toggle('mod', !!(a&&((a.scale||1)!==1||(a.dy||0)!==0)));
+    b.classList.toggle('selected', S.adjSel.has(ch));
+  });
+}
+function selectAdj(ch,ev){
+  const add=ev&&(ev.shiftKey||ev.ctrlKey||ev.metaKey);
+  if(add){ if(S.adjSel.has(ch)) S.adjSel.delete(ch); else S.adjSel.add(ch); }
+  else S.adjSel=new Set([ch]);
+  syncAdjSliders(); renderAdjustUI();
+}
+function selectAdjRow(rowChars,ev){
+  const set=(ev&&ev.shiftKey)?new Set(S.adjSel):new Set();
+  rowChars.forEach(c=>set.add(c));
+  S.adjSel=set;
+  syncAdjSliders(); renderAdjustUI();
+}
+function syncAdjSliders(){
+  const arr=[...S.adjSel];
+  let sc=100, dy=0;
+  if(arr.length){
+    const a0=S.adjust[arr[0]]||{scale:1,dy:0};
+    const uniform=arr.every(c=>{ const a=S.adjust[c]||{scale:1,dy:0};
+      return (a.scale||1)===(a0.scale||1)&&(a.dy||0)===(a0.dy||0); });
+    if(uniform){ sc=Math.round((a0.scale||1)*100); dy=a0.dy||0; }
+  }
+  $('adjScale').value=sc; $('oScale').textContent=sc;
+  $('adjDy').value=dy; $('oDy').textContent=dy;
 }
 $('adjScale').addEventListener('input',()=>{
   $('oScale').textContent=$('adjScale').value;
-  if(!S.adjSel) return;
-  (S.adjust[S.adjSel]=S.adjust[S.adjSel]||{scale:1,dy:0}).scale=+$('adjScale').value/100;
-  renderAdjustUI();
+  const v=+$('adjScale').value/100;
+  S.adjSel.forEach(c=>{ (S.adjust[c]=S.adjust[c]||{scale:1,dy:0}).scale=v; });
+  updateChipMods();
 });
 $('adjDy').addEventListener('input',()=>{
   $('oDy').textContent=$('adjDy').value;
-  if(!S.adjSel) return;
-  (S.adjust[S.adjSel]=S.adjust[S.adjSel]||{scale:1,dy:0}).dy=+$('adjDy').value;
-  renderAdjustUI();
+  const v=+$('adjDy').value;
+  S.adjSel.forEach(c=>{ (S.adjust[c]=S.adjust[c]||{scale:1,dy:0}).dy=v; });
+  updateChipMods();
 });
 $('btnApplyAdj').addEventListener('click',buildFont);
 $('btnResetGlyph').addEventListener('click',()=>{
-  if(!S.adjSel) return;
-  delete S.adjust[S.adjSel];
-  $('adjScale').value=100; $('oScale').textContent='100';
-  $('adjDy').value=0; $('oDy').textContent='0';
-  renderAdjustUI();
+  if(!S.adjSel.size) return;
+  S.adjSel.forEach(c=>delete S.adjust[c]);
+  syncAdjSliders(); updateChipMods();
 });
 $('btnResetAll').addEventListener('click',()=>{
   S.adjust={};
-  $('adjScale').value=100; $('oScale').textContent='100';
-  $('adjDy').value=0; $('oDy').textContent='0';
-  renderAdjustUI();
+  syncAdjSliders(); updateChipMods();
 });
 
 $('btnDownload').addEventListener('click',()=>{
